@@ -23,4 +23,6 @@ public class HotelListDTO {
     private Integer minPrice;
     //最高价格
     private Integer maxPrice;
+    //位置
+    private String location;
 }

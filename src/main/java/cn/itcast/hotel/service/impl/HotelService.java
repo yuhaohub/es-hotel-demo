@@ -9,11 +9,15 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.geo.GeoPoint;
+import org.elasticsearch.common.unit.DistanceUnit;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -54,11 +58,16 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
         if(hotelListDTO.getMinPrice() != null && hotelListDTO.getMaxPrice() != null){
             boolQuery.filter(QueryBuilders.rangeQuery("price").gte(hotelListDTO.getMinPrice()).lte(hotelListDTO.getMaxPrice()));
         }
-        request.source().query(boolQuery);
+
         // 2.2  分页
         int page = hotelListDTO.getPage();
         int size = hotelListDTO.getSize();
         request.source().from((page-1) * size).size(size);
+        //  2.3 排序
+        request.source().query(boolQuery);
+        if(!StringUtils.isEmpty(hotelListDTO.getLocation())){
+            request.source().sort(SortBuilders.geoDistanceSort("location", new GeoPoint(hotelListDTO.getLocation())).order(SortOrder.ASC).unit(DistanceUnit.KILOMETERS));
+        }
         //3、发送请求
         SearchResponse response = restClient.search(request, RequestOptions.DEFAULT);
 
@@ -80,6 +89,12 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
         for (SearchHit hit : hits) {
             String source = hit.getSourceAsString();
             HotelDoc hotelDoc = JSON.parseObject(source, HotelDoc.class);
+            //获取排序值
+            Object[] sortValues = hit.getSortValues();
+            if(sortValues != null && sortValues.length > 0){
+                //回显距离
+                hotelDoc.setDistance(sortValues[0]);
+            }
             hotelDocs.add(hotelDoc);
         }
         PageResult result = new PageResult(total,hotelDocs);
