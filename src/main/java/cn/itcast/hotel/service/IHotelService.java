@@ -24,4 +24,11 @@ public interface IHotelService extends IService<Hotel> {
      * @return
      */
     Map<String, List<String>> filters(HotelListDTO hotelListDTO) throws IOException;
+
+    /**
+     * 搜索框自动补全
+     * @param key
+     * @return
+     */
+    List<String> getSuggestions(String key) throws IOException;
 }

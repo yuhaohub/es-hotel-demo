@@ -22,6 +22,10 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -124,6 +128,28 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
         filters.put("city", cityAgg);
         filters.put("starName", starNameAgg);
         return filters;
+    }
+
+    @Override
+    public List<String> getSuggestions(String key) throws IOException {
+        //1、准备Request
+        SearchRequest request = new SearchRequest("hotel");
+        //2、准备DSL
+        request.source().suggest(new SuggestBuilder().addSuggestion("suggestions",  SuggestBuilders.completionSuggestion("suggestion").prefix(key).skipDuplicates(true).size(10)));
+        //3、发送请求
+        SearchResponse response = restClient.search(request, RequestOptions.DEFAULT);
+
+        //4、解析响应
+        Suggest suggest = response.getSuggest();
+        CompletionSuggestion suggestions = suggest.getSuggestion("suggestions");
+        List<CompletionSuggestion.Entry.Option> options = suggestions.getOptions();
+        List<String> optionsList = new ArrayList<>();
+
+        for (CompletionSuggestion.Entry.Option option : options){
+            String text = option.getText().toString();
+            optionsList.add(text);
+        }
+        return optionsList;
     }
 
 

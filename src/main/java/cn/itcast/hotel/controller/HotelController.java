@@ -4,10 +4,7 @@ package cn.itcast.hotel.controller;
 import cn.itcast.hotel.pojo.HotelListDTO;
 import cn.itcast.hotel.pojo.PageResult;
 import cn.itcast.hotel.service.IHotelService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -31,5 +28,11 @@ public class HotelController {
     @PostMapping("/filters")
     public Map<String,List<String>> filters(@RequestBody HotelListDTO hotelListDTO) throws IOException {
         return hotelService.filters(hotelListDTO);
+    }
+
+    //搜索框自动补全
+    @GetMapping("/suggestion")
+    public List<String> suggestion(@RequestParam("key") String key) throws IOException {
+        return hotelService.getSuggestions(key);
     }
 }
