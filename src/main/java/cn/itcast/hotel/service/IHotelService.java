@@ -6,6 +6,8 @@ import cn.itcast.hotel.pojo.PageResult;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 public interface IHotelService extends IService<Hotel> {
     /**
@@ -16,5 +18,10 @@ public interface IHotelService extends IService<Hotel> {
      */
     PageResult search(HotelListDTO hotelListDTO) throws IOException;
 
-
+    /**
+     *  获取过滤条件
+     * @param hotelListDTO
+     * @return
+     */
+    Map<String, List<String>> filters(HotelListDTO hotelListDTO) throws IOException;
 }

@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/hotel")
@@ -25,4 +27,9 @@ public class HotelController {
         return hotelService.search(hotelListDTO);
     }
 
+    //获取过滤条件
+    @PostMapping("/filters")
+    public Map<String,List<String>> filters(@RequestBody HotelListDTO hotelListDTO) throws IOException {
+        return hotelService.filters(hotelListDTO);
+    }
 }
